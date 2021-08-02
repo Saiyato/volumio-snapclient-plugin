@@ -177,10 +177,7 @@ snapclient.prototype.updateSnapClient = function (data)
 	
 	self.updateSnapClientConfig(data)
 	.then(function (restartService) {
-		if(data['client_enabled'] == true)
-			self.restartService("snapclient", false);
-		else
-			self.stopService("snapclient");
+		self.restartService("snapclient", false);		
 	})
 	.fail(function(e)
 	{
@@ -285,15 +282,8 @@ snapclient.prototype.updateSnapClientConfig = function (data)
 	var hostID = "";
 	if(data['custom_host_id'] && data['host_id'] != undefined && data['host_id'] != "")
 		hostID = " --hostID " + data['host_id'];
-	
-	var	command = "/bin/sed -i -- 's|^SNAPCLIENT_OPTS.*|SNAPCLIENT_OPTS=\"-d" + streamHost + snapSoundCard + hostID + ' ' + cli_commands +"\"|g' /data/plugins/miscellanea/snapcast/default/snapclient";
-	
-	exec(command, {uid:1000, gid:1000}, function (error, stout, stderr) {
-		if(error)
-			console.log(stderr);
 		
-		defer.resolve();
-	});
+	self.streamEdit("SNAPCLIENT_OPTS", "SNAPCLIENT_OPTS=\"-d" + streamHost + snapSoundCard + hostID + " " + cli_commands + "\"", __dirname + "/default/snapclient", false);
 	
 	return defer.promise;
 };

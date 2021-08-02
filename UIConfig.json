@@ -2,7 +2,7 @@
 	"page": {
 		"label": "TRANSLATE.SNAPCLIENT.SNAPCLIENTCONF"
 	},
-	"sections": [	{
+	"sections": [{
 		"id": "section_clientconf",
 		"element": "section",
 		"label": "TRANSLATE.SNAPCLIENT.CLIENT",
@@ -10,7 +10,7 @@
 		"icon": "fa-music",
 		"onSave": {
 			"type": "controller",
-			"endpoint": "miscellanea/SNAPCLIENT",
+			"endpoint": "audio_interface/snapclient",
 			"method": "updateSnapClient"
 		},
 		"saveButton": {
@@ -34,11 +34,7 @@
 				"value": "127.0.0.1",
 				"label": "Localhost [default]"
 			},
-			"options": [],
-			"visibleIf": {
-				"field": "client_enabled",
-				"value": true
-			}
+			"options": []
 		},
 		{
 			"id": "custom_host",
@@ -68,11 +64,7 @@
 				"value": "ALSA",
 				"label": "Audio Jack"
 			},
-			"options": [],
-			"visibleIf": {
-				"field": "client_enabled",
-				"value": true
-			}
+			"options": []
 		},
 		{
 			"id": "custom_host_id",
@@ -100,11 +92,7 @@
 			"doc": "TRANSLATE.SNAPCLIENT.D_CLI",
 			"label": "TRANSLATE.SNAPCLIENT.CLI",
 			"description": "TRANSLATE.SNAPCLIENT.DD_CLI",
-			"value": "",
-			"visibleIf": {
-				"field": "client_enabled",
-				"value": true
-			}
+			"value": ""
 		}]
 	}]
 }
