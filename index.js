@@ -6,10 +6,6 @@ var fs = require('fs-extra');
 var config = new (require('v-conf'))();
 var exec = require('child_process').exec;
 var net = require('net');
-var JsonSocket = require('json-socket');
-
-var socket = io.connect('http://localhost:3000');
-var volume = 0;
 
 module.exports = snapclient;
 function snapclient(context) {
@@ -77,8 +73,8 @@ snapclient.prototype.getUIConfig = function() {
 	if(self.config.get('debug_logging'))
 		console.log('[SnapClient] config: ' + JSON.stringify(self.config));
 		
-	let volumioInstances = self.getVolumioInstances();
-	let soundcards = self.getAlsaCards();
+	var volumioInstances = self.getVolumioInstances();
+	var soundcards = self.getAlsaCards();
 	
     var lang_code = this.commandRouter.sharedVars.get('language_code');
 	console.log('#################################### Loading configs');
