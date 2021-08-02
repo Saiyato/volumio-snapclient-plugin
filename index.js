@@ -165,7 +165,7 @@ snapclient.prototype.setConf = function(varName, varValue) {
 
 // Update Config Methods -----------------------------------------------------------------------------
 
-ControllerSnapCast.prototype.updateSnapClient = function (data)
+snapclient.prototype.updateSnapClient = function (data)
 {
 	var self = this;
 	var defer = libQ.defer();
