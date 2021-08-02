@@ -15,7 +15,7 @@ if [ ! -f $INSTALLING ]; then
 	echo "CPU architecture: " $ARCH
 	echo "Debian version: " $DEBIAN_VERSION
 
-	# Download latest SnapCast server package
+	# Download latest SnapCast client package
 	mkdir /home/volumio/snapclient
 
 	if [ $ARCH = "armhf" ] ; then
@@ -42,7 +42,7 @@ if [ ! -f $INSTALLING ]; then
 	# Backup old snap* installations
 	mv /usr/sbin/snapclient /usr/sbin/snapclient.bak
 
-	# Install packages (server and client) and dependencies
+	# Install packages (client) and dependencies
 	for f in /home/volumio/snapclient/snap*.deb; do dpkg -i "$f"; done
 	apt-get update && apt-get -f -y install
 	
@@ -56,7 +56,7 @@ if [ ! -f $INSTALLING ]; then
 		# echo "Not using new config template, reverting to default"
 		# rm /etc/snapclient.conf
 		# ln -fs /data/plugins/audio_interface/snapclient/templates/snapclient.conf /etc/snapclient.conf
-		# sed -i -- "s|^SNAPSERVER_OPTS.*||g" /etc/default/snapclient
+		# sed -i -- "s|^SNAPCLIENT_OPTS.*||g" /etc/default/snapclient
 	# fi
 	
 	# Cleanup files
