@@ -283,7 +283,7 @@ snapclient.prototype.updateSnapClientConfig = function (data)
 	if(data['custom_host_id'] && data['host_id'] != undefined && data['host_id'] != "")
 		hostID = " --hostID " + data['host_id'];
 		
-	self.streamEdit("SNAPCLIENT_OPTS", "SNAPCLIENT_OPTS=\"-d" + streamHost + snapSoundCard + hostID + " " + cli_commands + "\"", __dirname + "/default/snapclient", false);
+	self.streamEdit("SNAPCLIENT_OPTS", "SNAPCLIENT_OPTS=\"" + streamHost + snapSoundCard + hostID + " " + cli_commands + "\"", __dirname + "/default/snapclient", false);
 	
 	return defer.promise;
 };

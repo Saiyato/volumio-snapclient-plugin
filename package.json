@@ -1,6 +1,6 @@
 {
 	"name": "snapclient",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "SnapCast is a multiroom client-server audio player, where all clients are time synchronized with the server to play perfectly synced audio.",
 	"main": "index.js",
 	"scripts": {
