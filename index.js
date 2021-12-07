@@ -24,7 +24,6 @@ snapclient.prototype.onVolumioStart = function()
 	var configFile=this.commandRouter.pluginManager.getConfigurationFile(this.context,'config.json');
 	this.config = new (require('v-conf'))();
 	this.config.loadFile(configFile);
-
     return libQ.resolve();
 }
 
@@ -42,7 +41,7 @@ snapclient.prototype.onStart = function() {
 		self.logger.error("Could not start the SnapCast plugin in a fashionable manner. Error: " + e);
 		defer.reject(new error(e));
 	});
-
+	defer.resolve();
     return defer.promise;
 };
 
