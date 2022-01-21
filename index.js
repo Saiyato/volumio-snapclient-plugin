@@ -30,15 +30,12 @@ snapclient.prototype.onVolumioStart = function()
 snapclient.prototype.onStart = function() {
     var self = this;
 	var defer=libQ.defer();
-
-	if(self.config.get('debug_logging'))
-		console.log('[snapclient] config: ' + JSON.stringify(self.config));
 	
 	self.restartService(true)
 	.fail(function(e)
 	{
 		self.commandRouter.pushToastMessage('error', "Startup failed", "Could not start the SnapCast plugin in a fashionable manner.");
-		self.logger.error("Could not start the SnapCast plugin in a fashionable manner. Error: " + e);
+		self.logger.error("[SnapClient] Could not start the SnapCast plugin in a fashionable manner. Error: " + e);
 		defer.reject(new error(e));
 	});
 	defer.resolve();
@@ -69,14 +66,11 @@ snapclient.prototype.onRestart = function() {
 snapclient.prototype.getUIConfig = function() {
     var defer = libQ.defer();
     var self = this;
-	if(self.config.get('debug_logging'))
-		console.log('[SnapClient] config: ' + JSON.stringify(self.config));
 		
 	var volumioInstances = self.getVolumioInstances();
 	var soundcards = self.getAlsaCards();
 	
     var lang_code = this.commandRouter.sharedVars.get('language_code');
-	console.log('#################################### Loading configs');
 
     self.commandRouter.i18nJson(__dirname+'/i18n/strings_'+lang_code+'.json',
         __dirname+'/i18n/strings_en.json',
@@ -125,7 +119,7 @@ snapclient.prototype.getUIConfig = function() {
 			uiconf.sections[0].content[4].value = self.config.get('custom_host_id');
 			uiconf.sections[0].content[5].value = self.config.get('host_id');
 			uiconf.sections[0].content[6].value = self.config.get('client_cli');
-			self.logger.info("1/1 setting groups loaded");
+			self.logger.info("[SnapClient] 1/1 setting groups loaded");
 			
             defer.resolve(uiconf);
         })
@@ -172,7 +166,7 @@ snapclient.prototype.updateSnapClient = function (data)
 	self.config.set('host_id', data['host_id']);
 	self.config.set('client_cli', data['client_cli']);
 	
-	self.logger.info("Successfully updated client configuration");
+	self.logger.info("[SnapClient] Successfully updated client configuration");
 	
 	self.updateSnapClientConfig(data)
 	.then(function (restartService) {
@@ -230,7 +224,7 @@ snapclient.prototype.getAlsaCards = function () {
 
 		}
 	} catch (e) {
-		self.logger.error('Could not enumerate soundcards, error: ' + e);
+		self.logger.error('[SnapClient] Could not enumerate soundcards, error: ' + e);
 		var namestring = 'No Audio Device Available';
 		cards.push({id: '', hw: 'ALSA', name: namestring});
 	}
@@ -283,6 +277,7 @@ snapclient.prototype.updateSnapClientConfig = function (data)
 		hostID = " --hostID " + data['host_id'];
 		
 	self.streamEdit("SNAPCLIENT_OPTS", "SNAPCLIENT_OPTS=\"" + streamHost + snapSoundCard + hostID + " " + cli_commands + "\"", __dirname + "/default/snapclient", false);
+	self.commandRouter.pushToastMessage('success', "Settings saved", "Successfully saved the SnapClient settings and reinitialized the player.");
 	
 	return defer.promise;
 };
@@ -299,10 +294,10 @@ snapclient.prototype.executeShellScript = function (scriptName)
 		if(error)
 		{
 			console.log(stderr);
-			self.commandRouter.pushConsoleMessage('Could not execute script {' + scriptName + '} with error: ' + error);
+			self.commandRouter.pushConsoleMessage('[SnapClient] Could not execute script {' + scriptName + '} with error: ' + error);
 		}
 
-		self.commandRouter.pushConsoleMessage('Successfully executed script {' + scriptName + '}');
+		self.commandRouter.pushConsoleMessage('[SnapClient] Successfully executed script {' + scriptName + '}');
 		//fs.unlinkSync(scriptName)
 		defer.resolve();
 	});
@@ -345,7 +340,7 @@ snapclient.prototype.isValidJSON = function (str)
     } 
 	catch (e) 
 	{
-		self.logger.error('Could not parse JSON, error: ' + e + '\nMalformed JSON msg: ' + JSON.stringify(str));
+		self.logger.error('[SnapClient] Could not parse JSON, error: ' + e + '\nMalformed JSON msg: ' + JSON.stringify(str));
         return false;
     }
     return true;
@@ -362,21 +357,20 @@ snapclient.prototype.restartService = function (boot)
 	var command = "/usr/bin/sudo /bin/systemctl restart snapclient";		
 	if(!boot)
 	{
-		if(self.config.get('enable_debug_logging'))
-			self.logger.info('Reloading daemon, for changes to take effect');
+		self.logger.info('[SnapClient] Reloading daemon, for changes to take effect');
 		command = "/usr/bin/sudo /bin/systemctl daemon-reload && /usr/bin/sudo /bin/systemctl restart snapclient";
 	}
 	
 	exec(command, {uid:1000,gid:1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			self.commandRouter.pushConsoleMessage('The following error occurred while starting snapclient: ' + error);
+			self.commandRouter.pushConsoleMessage('[SnapClient] The following error occurred while starting snapclient: ' + error);
 			self.commandRouter.pushToastMessage('error', "Restart failed", "Restarting snapclient failed with error: " + error);
 			defer.reject();
 		}
 		else {
-			self.commandRouter.pushConsoleMessage('snapclient started');
+			self.commandRouter.pushConsoleMessage('[SnapClient] snapclient started');
 			if(boot == false)
-				self.commandRouter.pushToastMessage('success', "Restarted snapclient", "Restarted snapclient for the changes to take effect.");
+				self.commandRouter.pushToastMessage('success', "Restarted SnapClient", "Restarted SnapClient for the changes to take effect.");
 			
 			defer.resolve();
 		}
@@ -393,13 +387,13 @@ snapclient.prototype.stopService = function ()
 	var command = "/usr/bin/sudo /bin/systemctl stop snapclient";
 	exec(command, {uid:1000,gid:1000}, function (error, stdout, stderr) {
 		if (error !== null) {
-			self.commandRouter.pushConsoleMessage('The following error occurred while stopping snapclient: ' + error);
-			self.commandRouter.pushToastMessage('error', "Stopping service failed", "Stopping snapclient failed with error: " + error);
+			self.commandRouter.pushConsoleMessage('[SnapClient] The following error occurred while stopping SnapClient: ' + error);
+			self.commandRouter.pushToastMessage('error', "Stopping service failed", "Stopping SnapClient failed with error: " + error);
 			defer.reject();
 		}
 		else {
-			self.commandRouter.pushConsoleMessage('snapclient stopped');
-			self.commandRouter.pushToastMessage('success', "Stopping", "Stopped snapclient.");
+			self.commandRouter.pushConsoleMessage('[SnapClient] snapclient stopped');
+			self.commandRouter.pushToastMessage('success', "Stopping", "Stopped SnapClient.");
 			defer.resolve();
 		}
 	});
