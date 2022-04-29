@@ -189,7 +189,7 @@ snapclient.prototype.getAlsaCards = function () {
 	try {
 		var soundCardDir = '/proc/asound/';
 		var soundFiles = fs.readdirSync(soundCardDir);
-		cards.push({id: 99, hw: "", name: "Omit soundcard parameter"});
+		cards.push({id: 99, hw: "volumioOutput", name: "Use Volumio default"});
 		
 		for (var i = 0; i < soundFiles.length; i++) {
 
