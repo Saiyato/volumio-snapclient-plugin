@@ -11,7 +11,9 @@ if [ ! -f $INSTALLING ]; then
 	echo "Detecting CPU architecture and Debian version"
 	ARCH=$(dpkg --print-architecture)
 	DEBIAN_VERSION=$(cat /etc/os-release | grep '^VERSION=' | cut -d '(' -f2 | tr -d ')"')
-	SNAPCONF=NO
+	VOLUMIO_VERSION=$(cat /etc/os-release | awk '/VOLUMIO_VERSION/ { split($0,v,"="); gsub(/"/,"",v[2]); print v[2] }')
+	VOLUMIO_MAJOR=$(cat /etc/os-release | awk '/VOLUMIO_VERSION/ { split($0,v,"="); gsub(/"/,"",v[2]); split(v[2],m,"."); print m[1] }')
+	SNAPCONF="NO"
 	echo "CPU architecture: " $ARCH
 	echo "Debian version: " $DEBIAN_VERSION
 
@@ -58,6 +60,14 @@ if [ ! -f $INSTALLING ]; then
 		# ln -fs /data/plugins/audio_interface/snapclient/templates/snapclient.conf /etc/snapclient.conf
 		# sed -i -- "s|^SNAPCLIENT_OPTS.*||g" /etc/default/snapclient
 	# fi
+	
+	# Fix UIConf to match version (Volumio 3.x makes use of the AAMPP architecture, which removes the need to patch files)
+	if [ "$VOLUMIO_MAJOR" -gt "2" ]; then
+		echo "Disabling complex configuration options, AAMPP will take care of that"
+		mv /data/plugins/audio_interface/snapclient/UIConfig.json /data/plugins/audio_interface/snapclient/UIConfig.json.complex
+		mv /data/plugins/audio_interface/snapclient/UIConfig.json.simple /data/plugins/audio_interface/snapclient/UIConfig.json
+		mv /data/plugins/audio_interface/snapclient/index.js /data/plugins/audio_interface/snapclient/index.js.complex
+		mv /data/plugins/audio_interface/snapclient/index.js.simple /data/plugins/audio_interface/snapclient/index.js
 	
 	# Cleanup files
 	rm -rf /home/volumio/snapclient
