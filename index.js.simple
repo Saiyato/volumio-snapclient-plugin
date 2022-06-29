@@ -67,9 +67,7 @@ snapclient.prototype.getUIConfig = function() {
     var defer = libQ.defer();
     var self = this;
 		
-	var volumioInstances = self.getVolumioInstances();
-	var soundcards = self.getAlsaCards();
-	
+	var volumioInstances = self.getVolumioInstances();	
     var lang_code = this.commandRouter.sharedVars.get('language_code');
 
     self.commandRouter.i18nJson(__dirname+'/i18n/strings_'+lang_code+'.json',
@@ -102,23 +100,9 @@ snapclient.prototype.getUIConfig = function() {
 			}
 			uiconf.sections[0].content[1].value = self.config.get('custom_host');
 			uiconf.sections[0].content[2].value = self.config.get('host');
-			
-			for (var n = 0; n < soundcards.length; n++){
-				self.configManager.pushUIConfigParam(uiconf, 'sections[0].content[3].options', {
-					value: soundcards[n].hw,
-					label: soundcards[n].name
-				});
-			
-				if(soundcards[n].hw == self.config.get('soundcard'))
-				{
-					uiconf.sections[0].content[3].value.value = soundcards[n].hw;
-					uiconf.sections[0].content[3].value.label = soundcards[n].name;
-				}
-			}
-			
-			uiconf.sections[0].content[4].value = self.config.get('custom_host_id');
-			uiconf.sections[0].content[5].value = self.config.get('host_id');
-			uiconf.sections[0].content[6].value = self.config.get('client_cli');
+			uiconf.sections[0].content[3].value = self.config.get('custom_host_id');
+			uiconf.sections[0].content[4].value = self.config.get('host_id');
+			uiconf.sections[0].content[5].value = self.config.get('client_cli');
 			self.logger.info("[SnapClient] 1/1 setting groups loaded");
 			
             defer.resolve(uiconf);
@@ -161,7 +145,6 @@ snapclient.prototype.updateSnapClient = function (data)
 	self.config.set('volumio_host', data['volumio_host'].value);
 	self.config.set('custom_host', data['custom_host']);
 	self.config.set('host', data['host']);
-	self.config.set('soundcard', data['soundcard'].value);
 	self.config.set('custom_host_id', data['custom_host_id']);
 	self.config.set('host_id', data['host_id']);
 	self.config.set('client_cli', data['client_cli']);
@@ -180,71 +163,6 @@ snapclient.prototype.updateSnapClient = function (data)
 	return defer.promise;
 };
 
-snapclient.prototype.getAlsaCards = function () {
-	var self = this;
-	var cards = [];
-	var multi = false;
-	var carddata = fs.readJsonSync(('/volumio/app/plugins/audio_interface/alsa_controller/cards.json'),  'utf8', {throws: false});
-
-	try {
-		var soundCardDir = '/proc/asound/';
-		var soundFiles = fs.readdirSync(soundCardDir);
-		cards.push({id: 99, hw: "volumioOutput", name: "Use Volumio default"});
-		
-		for (var i = 0; i < soundFiles.length; i++) {
-
-			if (soundFiles[i].indexOf('card') >= 0 && soundFiles[i] != 'cards'){
-				var cardnum = soundFiles[i].replace('card', '');
-				var cardinfo = self.getCardinfo(cardnum);
-				var rawname = cardinfo.name;
-				var name = rawname;
-				var hw = fs.readFileSync(soundCardDir + soundFiles[i] + '/id').toString().trim();
-				var id = cardinfo.id;
-					for (var n = 0; n < carddata.cards.length; n++){
-						var cardname = carddata.cards[n].name.toString().trim();
-						if (cardname === rawname){
-							if(carddata.cards[n].multidevice) {
-								multi = true;
-								var card = carddata.cards[n];
-								for (var j = 0; j < card.devices.length; j++) {
-									var subdevice = carddata.cards[n].devices[j].number;
-									name = carddata.cards[n].devices[j].prettyname;
-									cards.push({id: id + ',' + subdevice, name: name});
-								}
-
-							} else {
-								multi = false;
-								name = carddata.cards[n].prettyname;
-							}
-						}
-					} if (!multi){
-						cards.push({id: id, hw: hw, name: name});
-					}
-			}
-
-		}
-	} catch (e) {
-		self.logger.error('[SnapClient] Could not enumerate soundcards, error: ' + e.message);
-		var namestring = 'No Audio Device Available';
-		cards.push({id: '', hw: 'ALSA', name: namestring});
-	}
-	return cards;
-};
-
-snapclient.prototype.getCardinfo = function (cardnum) {
-	var self = this;
-	var info = fs.readFileSync('/proc/asound/card'+cardnum+'/pcm0p/info').toString().trim().split('\n');
-
-	for (var e = 0; e < info.length; e++) {
-		if (info[e].indexOf('id') >= 0) {
-			var infoname = info[e].split(':')[1].replace(' ', '');
-		}
-
-	}
-	var cardinfo = {'id':cardnum,'name':infoname};
-	return cardinfo;
-};
-
 snapclient.prototype.getVolumioInstances = function () {
 	var self = this;
 	var results = self.commandRouter.executeOnPlugin('system_controller', 'volumiodiscovery', 'getDevices', '');
@@ -260,15 +178,6 @@ snapclient.prototype.updateSnapClientConfig = function (data)
 	if(data['custom_host'] == true)
 		streamHost = (data['host'] == undefined ? " -h localhost" : " -h " + data['host']);
 	
-	let snapSoundCard = " -s ";
-	if(data['soundcard'] != undefined)
-		if(data['soundcard'].value != "")
-			snapSoundCard += data['soundcard'].value;
-		else
-			snapSoundCard = "";
-	else
-		snapSoundCard = " -s 0";
-	
 	let cli_commands = (self.config.get('client_cli') == undefined ? '' : self.config.get('client_cli'));
 	
 	var hostID = "";
@@ -277,7 +186,7 @@ snapclient.prototype.updateSnapClientConfig = function (data)
 	
 	try
 	{
-		self.streamEdit("SNAPCLIENT_OPTS", "SNAPCLIENT_OPTS=\"" + streamHost + snapSoundCard + hostID + " " + cli_commands + "\"", __dirname + "/default/snapclient", false);
+		self.streamEdit("SNAPCLIENT_OPTS", "SNAPCLIENT_OPTS=\"" + streamHost + hostID + " " + cli_commands + "\"", __dirname + "/default/snapclient", false);
 		self.commandRouter.pushToastMessage('success', "Settings saved", "Successfully saved the SnapClient settings and reinitialized the player.");
 		defer.resolve();
 	}
