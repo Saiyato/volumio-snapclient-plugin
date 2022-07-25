@@ -6,7 +6,7 @@ if [ ! -f $INSTALLING ]; then
 
 	touch $INSTALLING
 	# Echo version number, for bug tracking purposes
-	echo "## Installing SnapClient plugin v0.0.1 ##"
+	echo "## Installing SnapClient plugin v2.0.2 ##"
 	
 	echo "Detecting CPU architecture and Debian version"
 	ARCH=$(dpkg --print-architecture)
@@ -68,6 +68,7 @@ if [ ! -f $INSTALLING ]; then
 		mv /data/plugins/audio_interface/snapclient/UIConfig.json.simple /data/plugins/audio_interface/snapclient/UIConfig.json
 		mv /data/plugins/audio_interface/snapclient/index.js /data/plugins/audio_interface/snapclient/index.js.complex
 		mv /data/plugins/audio_interface/snapclient/index.js.simple /data/plugins/audio_interface/snapclient/index.js
+	fi
 	
 	# Cleanup files
 	rm -rf /home/volumio/snapclient
